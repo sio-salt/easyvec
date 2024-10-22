@@ -1,4 +1,4 @@
 # easyvec
 
-- make my quantum chemistry life easier with this module
+- make my geometry modifying easier with this module
 
