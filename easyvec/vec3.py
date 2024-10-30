@@ -44,7 +44,7 @@ class Vec3:
 
     def __str__(self) -> str:
         return f"{self.x:19.12f} {self.y:19.12f} {self.z:19.12f}"
-    
+
     def __repr__(self) -> str:
         return f"Vec3({self.x:.12f}, {self.y:.12f}, {self.z:.12f})"
 
@@ -99,7 +99,7 @@ class Vec3:
         return self / scalar
 
     def __pow__(self, scalar: float) -> Vec3:
-        return Vec3(self.x ** scalar, self.y ** scalar, self.z ** scalar)
+        return Vec3(self.x**scalar, self.y**scalar, self.z**scalar)
 
     def dot(self, other: Vec3) -> float:
         return self.x * other.x + self.y * other.y + self.z * other.z
@@ -213,21 +213,45 @@ class Vec3:
 
         # Rodrigues' rotation formula
         x_rot = (
-            (cos_theta + axis_unit_vector.x**2 * one_minus_cos) * self.x +
-            (axis_unit_vector.x * axis_unit_vector.y * one_minus_cos - axis_unit_vector.z * sin_theta) * self.y +
-            (axis_unit_vector.x * axis_unit_vector.z * one_minus_cos + axis_unit_vector.y * sin_theta) * self.z
+            (cos_theta + axis_unit_vector.x**2 * one_minus_cos) * self.x
+            + (
+                axis_unit_vector.x * axis_unit_vector.y * one_minus_cos
+                - axis_unit_vector.z * sin_theta
+            )
+            * self.y
+            + (
+                axis_unit_vector.x * axis_unit_vector.z * one_minus_cos
+                + axis_unit_vector.y * sin_theta
+            )
+            * self.z
         )
 
         y_rot = (
-            (axis_unit_vector.y * axis_unit_vector.x * one_minus_cos + axis_unit_vector.z * sin_theta) * self.x +
-            (cos_theta + axis_unit_vector.y**2 * one_minus_cos) * self.y +
-            (axis_unit_vector.y * axis_unit_vector.z * one_minus_cos - axis_unit_vector.x * sin_theta) * self.z
+            (
+                axis_unit_vector.y * axis_unit_vector.x * one_minus_cos
+                + axis_unit_vector.z * sin_theta
+            )
+            * self.x
+            + (cos_theta + axis_unit_vector.y**2 * one_minus_cos) * self.y
+            + (
+                axis_unit_vector.y * axis_unit_vector.z * one_minus_cos
+                - axis_unit_vector.x * sin_theta
+            )
+            * self.z
         )
 
         z_rot = (
-            (axis_unit_vector.z * axis_unit_vector.x * one_minus_cos - axis_unit_vector.y * sin_theta) * self.x +
-            (axis_unit_vector.z * axis_unit_vector.y * one_minus_cos + axis_unit_vector.x * sin_theta) * self.y +
-            (cos_theta + axis_unit_vector.z**2 * one_minus_cos) * self.z
+            (
+                axis_unit_vector.z * axis_unit_vector.x * one_minus_cos
+                - axis_unit_vector.y * sin_theta
+            )
+            * self.x
+            + (
+                axis_unit_vector.z * axis_unit_vector.y * one_minus_cos
+                + axis_unit_vector.x * sin_theta
+            )
+            * self.y
+            + (cos_theta + axis_unit_vector.z**2 * one_minus_cos) * self.z
         )
 
         xyz_rot = Vec3(x_rot, y_rot, z_rot)
