@@ -1,5 +1,6 @@
 from __future__ import annotations
 import math
+
 # import numpy as np
 # from scipy.spatial.transform import Rotation as R
 
@@ -129,7 +130,9 @@ class Vec3:
         return (self + other) / 2
 
     def translate(self, trans_vec: Vec3) -> None:
-        self += trans_vec
+        self.x += trans_vec.x
+        self.y += trans_vec.y
+        self.z += trans_vec.z
 
     def mirror(self, sx: int, sy: int, sz: int) -> None:
         if sx not in (-1, 1) or sy not in (-1, 1) or sz not in (-1, 1):
@@ -258,4 +261,3 @@ class Vec3:
 
         # translate back to the original position
         self = xyz_rot + axis_point1
-
