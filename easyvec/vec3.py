@@ -100,6 +100,12 @@ class Vec3:
     def __pow__(self, scalar: float) -> Vec3:
         return Vec3(self.x**scalar, self.y**scalar, self.z**scalar)
 
+    def __matmul__(self, mat: list[list[int | float]]) -> Vec3:
+        return self.matmul(mat)
+
+    def __len__(self) -> int:
+        return 3
+
     def dot(self, other: Vec3) -> float:
         return self.x * other.x + self.y * other.y + self.z * other.z
 
@@ -109,6 +115,18 @@ class Vec3:
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
+
+    def matmul(self, mat: list[list[int | float]]) -> Vec3:
+        if not (
+            isinstance(mat, list)
+            and len(mat) == 3
+            and all(len(row) == 3 for row in mat)
+        ):
+            raise ValueError("matrix must be 3x3")
+        x = mat[0][0] * self.x + mat[0][1] * self.y + mat[0][2] * self.z
+        y = mat[1][0] * self.x + mat[1][1] * self.y + mat[1][2] * self.z
+        z = mat[2][0] * self.x + mat[2][1] * self.y + mat[2][2] * self.z
+        return Vec3(x, y, z)
 
     def distance_to(self, other: Vec3) -> float:
         return math.sqrt(
