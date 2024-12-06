@@ -50,7 +50,7 @@ class Vec3:
         return f"Vec3({self.x:.12f}, {self.y:.12f}, {self.z:.12f})"
 
     def __getitem__(self, index: int) -> float:
-        return (self.symbol, self.x, self.y, self.z)[index]
+        return (self.x, self.y, self.z)[index]
 
     def __eq__(self, other: Vec3) -> bool:
         return self.x == other.x and self.y == other.y and self.z == other.z
