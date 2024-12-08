@@ -53,7 +53,7 @@ class Vec3:
         return (self.x, self.y, self.z)[index]
 
     def __eq__(self, other: Vec3) -> bool:
-        return self.x == other.x and self.y == other.y and self.z == other.z
+        return self.x==other.x and self.y == other.y and self.z == other.z
 
     def __ne__(self, other: Vec3) -> bool:
         return not self == other
@@ -62,7 +62,12 @@ class Vec3:
         return Vec3(-self.x, -self.y, -self.z)
 
     def __add__(self, other: Vec3) -> Vec3:
-        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+        if not isinstance(other, (self.__class__, Vec3)):
+            return NotImplementedError(
+                "unsupported operand type(s) for +:"
+                + f"'{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self.__class__(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __iadd__(self, other: Vec3) -> Vec3:
         self.x += other.x
@@ -105,6 +110,9 @@ class Vec3:
 
     def __len__(self) -> int:
         return 3
+
+    def copy(self) -> Vec3:
+        return Vec3(self.x, self.y, self.z)
 
     def dot(self, other: Vec3) -> float:
         return self.x * other.x + self.y * other.y + self.z * other.z
