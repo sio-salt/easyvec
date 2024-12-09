@@ -3,5 +3,5 @@ requires-python = ">=3.7"
 
 [[package]]
 name = "easyvec"
-version = "0.1.1"
+version = "0.1.2"
 source = { editable = "." }
