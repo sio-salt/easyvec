@@ -52,6 +52,18 @@ class Vec3:
     def __getitem__(self, index: int) -> float:
         return (self.x, self.y, self.z)[index]
 
+    def __setitem__(self, index: int, value: int | float) -> None:
+        if not isinstance(value, (int, float)):
+            raise TypeError("value must be an int or float")
+        if index in (0, -3):
+            self.x = value
+        elif index in (1, -2):
+            self.y = value
+        elif index in (2, -1):
+            self.z = value
+        else:
+            raise IndexError("index out of range")
+
     def __eq__(self, other: Vec3) -> bool:
         return self.x == other.x and self.y == other.y and self.z == other.z
 
@@ -189,7 +201,7 @@ class Vec3:
         # calculate the mirror image of the point
         self += 2 * (projection - self)
 
-    def rotate(self, rot_mat: mat_type) -> None:
+    def rotate_by_mat(self, rot_mat: mat_type) -> None:
         if not (
             isinstance(rot_mat, (list, tuple, Vec3))
             and len(rot_mat) == 3
