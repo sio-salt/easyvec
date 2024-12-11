@@ -53,7 +53,7 @@ class Vec3:
         return (self.x, self.y, self.z)[index]
 
     def __eq__(self, other: Vec3) -> bool:
-        return self.x==other.x and self.y == other.y and self.z == other.z
+        return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __ne__(self, other: Vec3) -> bool:
         return not self == other
@@ -62,11 +62,7 @@ class Vec3:
         return Vec3(-self.x, -self.y, -self.z)
 
     def __add__(self, other: Vec3) -> Vec3:
-        if not isinstance(other, (self.__class__, Vec3)):
-            return NotImplementedError(
-                "unsupported operand type(s) for +:"
-                + f"'{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+        other_class_check_for_operand(self, other, "+")
         return self.__class__(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __iadd__(self, other: Vec3) -> Vec3:
@@ -76,7 +72,8 @@ class Vec3:
         return self
 
     def __sub__(self, other: Vec3) -> Vec3:
-        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+        other_class_check_for_operand(self, other, "-")
+        return self.__class__(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __isub__(self, other: Vec3) -> Vec3:
         self.x -= other.x
@@ -84,10 +81,14 @@ class Vec3:
         self.z -= other.z
         return self
 
-    def __mul__(self, scalar: float) -> Vec3:
+    def __mul__(self, scalar) -> Vec3:
+        if not isinstance(scalar, (int, float)):
+            raise TypeError("scalar must be an int or float")
         return Vec3(self.x * scalar, self.y * scalar, self.z * scalar)
 
-    def __rmul__(self, scalar: float) -> Vec3:
+    def __rmul__(self, scalar) -> Vec3:
+        if not isinstance(scalar, (int, float)):
+            raise TypeError("scalar must be an int or float")
         return self * scalar
 
     def __imul__(self, scalar: float) -> Vec3:
@@ -105,7 +106,7 @@ class Vec3:
     def __pow__(self, scalar: float) -> Vec3:
         return Vec3(self.x**scalar, self.y**scalar, self.z**scalar)
 
-    def __matmul__(self, mat: list[list[int | float]]) -> Vec3:
+    def __matmul__(self, mat: mat_type) -> Vec3:
         return self.matmul(mat)
 
     def __len__(self) -> int:
@@ -114,29 +115,33 @@ class Vec3:
     def copy(self) -> Vec3:
         return Vec3(self.x, self.y, self.z)
 
-    def dot(self, other: Vec3) -> float:
+    def dot(self, other: vec_type) -> float:
+        other = vectorize_arg(other)
         return self.x * other.x + self.y * other.y + self.z * other.z
 
-    def cross(self, other: Vec3) -> Vec3:
+    def cross(self, other: vec_type) -> Vec3:
         return Vec3(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
 
-    def matmul(self, mat: list[list[int | float]]) -> Vec3:
+    def matmul(self, mat: mat_type) -> Vec3:
         if not (
             isinstance(mat, list)
             and len(mat) == 3
             and all(len(row) == 3 for row in mat)
+            and all(isinstance(i, (int, float)) for row in mat for i in row)
         ):
-            raise ValueError("matrix must be 3x3")
+            raise ValueError("matrix must be 3x3 list of int or float")
+
         x = mat[0][0] * self.x + mat[0][1] * self.y + mat[0][2] * self.z
         y = mat[1][0] * self.x + mat[1][1] * self.y + mat[1][2] * self.z
         z = mat[2][0] * self.x + mat[2][1] * self.y + mat[2][2] * self.z
         return Vec3(x, y, z)
 
     def distance_to(self, other: Vec3) -> float:
+        other = vectorize_arg(other)
         return math.sqrt(
             (self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2
         )
@@ -153,7 +158,8 @@ class Vec3:
     def mid_point(self, other: Vec3) -> Vec3:
         return (self + other) / 2
 
-    def translate(self, trans_vec: Vec3) -> None:
+    def translate(self, trans_vec) -> None:
+        trans_vec = vectorize_arg(trans_vec)
         self.x += trans_vec.x
         self.y += trans_vec.y
         self.z += trans_vec.z
@@ -183,13 +189,14 @@ class Vec3:
         # calculate the mirror image of the point
         self += 2 * (projection - self)
 
-    def rotate(self, rot_mat: list) -> None:
+    def rotate(self, rot_mat: mat_type) -> None:
         if not (
-            isinstance(rot_mat, list)
+            isinstance(rot_mat, (list, tuple, Vec3))
             and len(rot_mat) == 3
             and all(len(row) == 3 for row in rot_mat)
+            and all(isinstance(i, (int, float)) for row in rot_mat for i in row)
         ):
-            raise ValueError("rotation matrix must be 3x3")
+            raise ValueError("rotation matrix must be 3x3 list of int or float")
 
         x_rot = rot_mat[0][0] * self.x + rot_mat[0][1] * self.y + rot_mat[0][2] * self.z
         y_rot = rot_mat[1][0] * self.x + rot_mat[1][1] * self.y + rot_mat[1][2] * self.z
@@ -200,17 +207,21 @@ class Vec3:
         self.z = z_rot
 
     def rotate_by_axis(
-        self, axis_point1: Vec3, axis_point2: Vec3, angle_degrees: float
+        self,
+        axis_point1: vec_type,
+        axis_point2: vec_type,
+        deg: float | int,
+        # self, axis_vec: Vec3 | list[int | float] | tuple[int | float], deg: float | int
     ) -> None:
         """
         :param axis_point1: One point on the rotation axis
         :param axis_point2: Another point on the rotation axis
-        :param angle_degrees: Rotation angle (degrees)
+        :param deg: Rotation angle (degrees)
         """
 
         # if scipy and numpy is available, you can use the following code
         """
-        angle_radians = np.deg2rad(angle_degrees)
+        angle_radians = np.deg2rad(deg)
         axis_vector = np.array(
             [
                 axis_point2.x - axis_point1.x,
@@ -226,7 +237,10 @@ class Vec3:
         self.x, self.y, self.z = rotated_point.tolist()
         """
 
-        angle_radians = math.radians(angle_degrees)
+        axis_point1 = vectorize_arg(axis_point1)
+        axis_point2 = vectorize_arg(axis_point2)
+
+        angle_radians = math.radians(deg)
         axis_vector = axis_point2 - axis_point1
         axis_unit_vector = axis_vector / axis_vector.norm()
 
@@ -281,7 +295,28 @@ class Vec3:
             + (cos_theta + axis_unit_vector.z**2 * one_minus_cos) * self.z
         )
 
-        xyz_rot = Vec3(x_rot, y_rot, z_rot)
+        xyz_rotated = Vec3(x_rot, y_rot, z_rot)
 
         # translate back to the original position
-        self = xyz_rot + axis_point1
+        self = xyz_rotated + axis_point1
+
+
+vec_type = Vec3 | list[int | float] | tuple[int | float]
+mat_type = list[Vec3 | list[int | float] | tuple[int | float]]
+
+
+def vectorize_arg(arg: vec_type) -> Vec3:
+    if isinstance(arg, Vec3):
+        return arg
+    if isinstance(arg, (list, tuple)) and len(arg) == 3:
+        if all(isinstance(i, (int, float)) for i in arg):
+            return Vec3(*arg)
+    raise ValueError("arg must be a Vec3 instance or a list/tuple of 3 int or float")
+
+
+def other_class_check_for_operand(self, other, operand: str) -> None:
+    if not isinstance(other, self.__class__):
+        return NotImplementedError(
+            f"unsupported operand type(s) for {operand}:"
+            + f"'{self.__class__.__name__}' and '{other.__class__.__name__}'"
+        )
